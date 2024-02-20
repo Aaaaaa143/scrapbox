@@ -1,3 +1,5 @@
+from django.forms import BaseModelForm
+from django.http import HttpResponse
 from django.shortcuts import render,redirect
 from django.contrib.auth import login,logout,authenticate
 from django.views.generic import View,CreateView,FormView,UpdateView,ListView
@@ -18,42 +20,45 @@ class SignUpView(CreateView):
         return reverse("signin")
     
 class SignInView(FormView):
+   template_name="login.html"
+   form_class=LoginForm
 
-    template_name="login.html"
-    form_class=LoginForm
-
-    def get(self,request,*args,**kwargs):
-        form=LoginForm(request.POST)
-        if form.is_valid():
+   def post(self, request,*args, **kwargs):
+       form=LoginForm(request.POST)
+       if form.is_valid():
             uname=form.cleaned_data.get("username")
             pwd=form.cleaned_data.get("password")
-            user_object=authenticate(request,username=uname,password=pwd)
-            if user_object:
-                login(request,user_object)
+            user_obj=authenticate(request,username=uname,password=pwd)
+            if user_obj:
+                login(request,user_obj)
+                print(request.user)
                 return redirect("index")
-        messages.error(request,"failed to login invalid credentials")
-        return render(request,"login.html",{"form":form})
+            print(request.user)
+       return render(request,"login.html",{"form":form})
     
-    def get_success_url(self):
-        return reverse("index")
-    
-class IndexView(CreateView,ListView):
+class IndexView(ListView):
 
     template_name="index.html"
-    form_class=ScrapForm
     context_object_name="data"
-
-    def form_valid(self, form):
-        form.instance.user=self.request.user
-        return super().form_valid(form)
+    model=Scraps
     
     def get_queryset(self):
         qs=Scraps.objects.all()
         return qs    
 
 
+class ScrapAddView(CreateView):
+    template_name="scrapadd.html"
+    form_class=ScrapForm
+    
+    def form_valid(self, form: BaseModelForm):
+        form.instance.user=self.request.user
+        return super().form_valid(form)
+    
     def get_success_url(self):
         return reverse("index")
+    
+
 
 class UserProfileView(UpdateView):
     template_name="profile.html"

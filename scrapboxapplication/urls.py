@@ -30,4 +30,6 @@ urlpatterns = [
     path('scrapbox/<int:pk>/',views.ScrapDetailView.as_view(),name="scrap-detail"),
     path('scrapbox/delete/<int:pk>/',views.ScrapDeleteView.as_view()),
     path('scrapbox/update/<int:pk>/',views.ScrapUpdateView.as_view(),name="update"),
+    path('scrapbox/signout/',views.SignOutView.as_view(),name="signout"),
+    path('scrap/add/',views.ScrapAddView.as_view(),name="scrap-add"),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
